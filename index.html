@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kino Premiéra - Váš filmový zážitok</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='90' font-size='90'>🎬</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d0d0d;
+            color: #f0f0f0;
+            scroll-behavior: smooth;
+        }
+        /* Prispôsobený gradient pre tlačidlá */
+        .btn-gradient {
+            background-image: linear-gradient(to right, #4a00e0, #8e2de2);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(142, 45, 226, 0.4);
+        }
+        /* Custom scrollbar for better visual */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a00e0;
+            border-radius: 4px;
+        }
+        .card-bg {
+            background: rgba(14, 14, 14, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Responzívny iframe pre video */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+        }
+        .video-container iframe,
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Štýly pre modálne okno */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 90%;
+            width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-out;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigácia -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-[#0d0d0d] bg-opacity-80 backdrop-blur-md transition-all duration-300">
+        <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M18 3v2h-2V3c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v2H4V3c0-1.1-.9-2-2-2c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h2v-2h2v2h8v-2h2v2h2c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v2h2V3zM8 21H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V9h2v2zm8 10h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8v-2h8v2zm0-4h-8V9h8v2z"/>
+                </svg>
+                <span class="text-2xl font-bold text-white">Kino Premiéra</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#program" class="text-gray-300 hover:text-white transition duration-300">Program</a>
+                <a href="#ocinenach" class="text-gray-300 hover:text-white transition duration-300">O kine</a>
+                <a href="#kontakt" class="text-gray-300 hover:text-white transition duration-300">Kontakt</a>
+                <a href="#galeria" class="text-gray-300 hover:text-white transition duration-300">Galéria</a>
+            </div>
+            <button class="md:hidden text-white focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Úvodná sekcia (Hero) -->
+        <section class="relative h-screen flex items-center justify-center text-center">
+            <video autoplay muted loop class="absolute inset-0 w-full h-full object-cover z-0">
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-audience-in-a-movie-theater-watching-a-film-144-large.mp4" type="video/mp4">
+            </video>
+            <div class="absolute inset-0 bg-black bg-opacity-70 z-10"></div>
+            <div class="relative z-20 max-w-2xl px-4">
+                <h1 class="text-5xl md:text-6xl font-extrabold leading-tight text-white mb-4">Ponorte sa do sveta filmov</h1>
+                <p class="text-lg md:text-xl text-gray-300 mb-8">Zažite filmový zážitok, aký ste ešte nezažili. S najlepšou kvalitou zvuku a obrazu.</p>
+                <a href="#program" class="btn-gradient text-white font-bold py-3 px-8 rounded-full shadow-lg">Pozrieť program</a>
+            </div>
+        </section>
+
+        <!-- Sekcia Program -->
+        <section id="program" class="py-20">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-white">Aktuálny program</h2>
+                    <p class="mt-4 text-lg text-gray-400">Vyberte si svoj filmový zážitok z ponuky, ktorá sa neustále aktualizuje.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Film 1 -->
+                    <div class="card-bg rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                        <img src="https://placehold.co/600x400/8e2de2/ffffff?text=FILM+1" alt="Plagát filmu 1" class="w-full h-64 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 text-white">Film 1: Sci-fi dobrodružstvo</h3>
+                            <p class="text-gray-400 text-sm">Žáner: Sci-fi, Dobrodružstvo | Dĺžka: 142 min.</p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="bg-violet-700 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">18:00</span>
+                                <span class="bg-violet-700 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">20:30</span>
+                                <span class="bg-violet-700 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">22:45</span>
+                            </div>
+                            <!-- Tlačidlo pre otvorenie modálneho okna -->
+                            <button class="open-modal-btn mt-6 inline-block btn-gradient text-white font-bold py-2 px-6 rounded-full text-sm">Kúpiť lístky</button>
+                        </div>
+                    </div>
+
+                    <!-- Film 2 -->
+                    <div class="card-bg rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                        <img src="https://placehold.co/600x400/4a00e0/ffffff?text=FILM+2" alt="Plagát filmu 2" class="w-full h-64 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 text-white">Film 2: Romantická dráma</h3>
+                            <p class="text-gray-400 text-sm">Žáner: Romantika, Dráma | Dĺžka: 110 min.</p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="bg-violet-700 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">17:30</span>
+                                <span class="bg-violet-700 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">20:00</span>
+                            </div>
+                            <button class="open-modal-btn mt-6 inline-block btn-gradient text-white font-bold py-2 px-6 rounded-full text-sm">Kúpiť lístky</button>
+                        </div>
+                    </div>
+
+                    <!-- Sám doma 2 Trailer -->
+                    <div class="card-bg rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                        <div class="video-container">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/5h9VDUNtoto?si=UNNNWAqMg-RvxV2K" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 text-white">Sám doma: Stratený v New Yorku</h3>
+                            <p class="text-gray-400 text-sm">Žáner: Komédia, Rodinný | Dĺžka: 120 min.</p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="bg-violet-700 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">15:00</span>
+                                <span class="bg-violet-700 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">17:30</span>
+                                <span class="bg-violet-700 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">20:00</span>
+                            </div>
+                            <button class="open-modal-btn mt-6 inline-block btn-gradient text-white font-bold py-2 px-6 rounded-full text-sm">Kúpiť lístky</button>
+                        </div>
+                    </div>
+
+                    <!-- Stranger Things Trailer -->
+                    <div class="card-bg rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                        <div class="video-container">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/iKZyYdwS3Wg?si=1oAYzeBaDIdgjgJF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2 text-white">Stranger Things: Pokračovanie</h3>
+                            <p class="text-gray-400 text-sm">Žáner: Sci-fi, Horor, Dráma | Dĺžka: 150 min.</p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="bg-violet-700 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">18:00</span>
+                                <span class="bg-violet-700 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">20:30</span>
+                            </div>
+                            <button class="open-modal-btn mt-6 inline-block btn-gradient text-white font-bold py-2 px-6 rounded-full text-sm">Kúpiť lístky</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcia O Kine -->
+        <section id="ocinenach" class="py-20 bg-[#1a1a1a]">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2">
+                    <h2 class="text-4xl font-bold text-white mb-4">O našom kine</h2>
+                    <p class="text-lg text-gray-400 mb-6">
+                        V Kine Premiéra sa snažíme priniesť filmové umenie na najvyššej úrovni. Naše sály sú vybavené najmodernejšou technikou, ktorá zabezpečí krištáľovo čistý obraz a pohlcujúci zvuk. Každá návšteva u nás je zážitkom.
+                    </p>
+                    <p class="text-gray-400 mb-6">
+                        Náš cieľ je poskytnúť divákom nielen film, ale aj pohodlie a jedinečnú atmosféru. S luxusnými sedadlami a špeciálnym občerstvením si u nás môžete vychutnať každý okamih.
+                    </p>
+                    <a href="#" class="btn-gradient text-white font-bold py-3 px-8 rounded-full shadow-lg">Čítať viac</a>
+                </div>
+                <div class="lg:w-1/2">
+                    
+                </div>
+            </div>
+        </section>
+        
+        <!-- Sekcia Galéria -->
+        <section id="galeria" class="py-20">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-white">Naša atmosféra</h2>
+                    <p class="mt-4 text-lg text-gray-400">Nahliadnite do našich priestorov a pocíťte jedinečnú atmosféru.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
+                    
+                    
+                    
+                    
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekcia Kontakt -->
+        <section id="kontakt" class="py-20 bg-[#1a1a1a]">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-white">Kontaktujte nás</h2>
+                    <p class="mt-4 text-lg text-gray-400">Navštívte nás v jednej z našich pobočiek po celom Slovensku alebo nám napíšte.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div class="card-bg rounded-lg p-8 shadow-xl">
+                        <h3 class="text-2xl font-semibold mb-4 text-white">Naše pobočky</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2 text-white">Bratislava</h4>
+                                <p class="mb-1 text-gray-400">**Adresa:** Vaša adresa v Bratislave</p>
+                                <p class="mb-1 text-gray-400">**Telefón:** Váš telefónny kontakt</p>
+                                <p class="text-gray-400">**Email:** Váš e-mail</p>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2 text-white">Košice</h4>
+                                <p class="mb-1 text-gray-400">**Adresa:** Filmová 5, 040 01 Košice</p>
+                                <p class="mb-1 text-gray-400">**Telefón:** +421 951 123 456</p>
+                                <p class="text-gray-400">**Email:** kosice@kino-premiera.sk</p>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2 text-white">Banská Bystrica</h4>
+                                <p class="mb-1 text-gray-400">**Adresa:** Strieborná 7, 974 01 Banská Bystrica</p>
+                                <p class="mb-1 text-gray-400">**Telefón:** +421 951 789 012</p>
+                                <p class="text-gray-400">**Email:** banskabystrica@kino-premiera.sk</p>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2 text-white">Žilina</h4>
+                                <p class="mb-1 text-gray-400">**Adresa:** Hviezdna 12, 010 01 Žilina</p>
+                                <p class="mb-1 text-gray-400">**Telefón:** +421 951 345 678</p>
+                                <p class="text-gray-400">**Email:** zilina@kino-premiera.sk</p>
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-semibold mt-6 mb-2 text-white">Otváracie hodiny</h4>
+                        <p class="text-gray-400">**Pondelok - Piatok:** 15:00 - 23:00</p>
+                        <p class="text-gray-400">**Sobota - Nedeľa:** 10:00 - 23:00</p>
+                    </div>
+                    <div class="card-bg rounded-lg p-8 shadow-xl">
+                        <h3 class="text-2xl font-semibold mb-4 text-white">Napíšte nám</h3>
+                        <form class="space-y-4">
+                            <div>
+                                <label for="meno" class="block text-sm font-medium text-gray-400">Meno</label>
+                                <input type="text" id="meno" name="meno" class="mt-1 block w-full px-3 py-2 bg-[#0d0d0d] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-400">Email</label>
+                                <input type="email" id="email" name="email" class="mt-1 block w-full px-3 py-2 bg-[#0d0d0d] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500">
+                            </div>
+                            <div>
+                                <label for="sprava" class="block text-sm font-medium text-gray-400">Správa</label>
+                                <textarea id="sprava" name="sprava" rows="4" class="mt-1 block w-full px-3 py-2 bg-[#0d0d0d] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500"></textarea>
+                            </div>
+                            <button type="submit" class="btn-gradient text-white font-bold py-2 px-6 rounded-full w-full">Odoslať správu</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Modálne okno pre nákup lístkov -->
+    <div id="paymentModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-white">Nákup lístka</h2>
+            <form id="paymentForm" class="space-y-4">
+                <div>
+                    <label for="fullName" class="block text-sm font-medium text-gray-400">Celé meno</label>
+                    <input type="text" id="fullName" name="fullName" required class="mt-1 block w-full px-3 py-2 bg-[#0d0d0d] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500">
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-400">E-mail</label>
+                    <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 bg-[#0d0d0d] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500">
+                </div>
+                
+                <h3 class="text-xl font-semibold mt-6 text-white">Platba</h3>
+                <div class="flex items-center space-x-4 mt-2">
+                    <label class="flex items-center">
+                        <input type="radio" name="paymentMethod" value="card" checked class="text-violet-500 focus:ring-violet-500">
+                        <span class="ml-2 text-gray-300">Kreditná karta</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="paymentMethod" value="other" class="text-violet-500 focus:ring-violet-500">
+                        <span class="ml-2 text-gray-300">Iné zdroje</span>
+                    </label>
+                </div>
+
+                <!-- Formulár pre kreditnú kartu -->
+                <div id="creditCardForm" class="space-y-4 mt-4">
+                    <div>
+                        <label for="cardNumber" class="block text-sm font-medium text-gray-400">Číslo karty</label>
+                        <input type="text" id="cardNumber" name="cardNumber" pattern="[0-9]{16}" placeholder="####-####-####-####" required class="mt-1 block w-full px-3 py-2 bg-[#0d0d0d] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="expiry" class="block text-sm font-medium text-gray-400">Platnosť (MM/RR)</label>
+                            <input type="text" id="expiry" name="expiry" pattern="(0[1-9]|1[0-2])\/\d{2}" placeholder="MM/RR" required class="mt-1 block w-full px-3 py-2 bg-[#0d0d0d] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500">
+                        </div>
+                        <div>
+                            <label for="cvc" class="block text-sm font-medium text-gray-400">CVC</label>
+                            <input type="text" id="cvc" name="cvc" pattern="\d{3,4}" placeholder="CVC" required class="mt-1 block w-full px-3 py-2 bg-[#0d0d0d] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-violet-500 focus:border-violet-500">
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-gradient text-white font-bold py-2 px-6 rounded-full w-full mt-4">Potvrdiť platbu</button>
+            </form>
+
+            <!-- Tlačidlo na zatvorenie modálneho okna -->
+            <button id="closeModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white transition duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div id="messageBox" class="mt-4 hidden p-3 rounded-md text-center"></div>
+        </div>
+    </div>
+
+    <!-- Pätka -->
+    <footer class="bg-[#0d0d0d] py-10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400">
+            <div class="flex flex-col md:flex-row justify-center items-center mb-4 space-y-4 md:space-y-0 md:space-x-8">
+                <a href="#" class="hover:text-white transition duration-300">Podmienky používania</a>
+                <a href="#" class="hover:text-white transition duration-300">Zásady ochrany osobných údajov</a>
+                <a href="#" class="hover:text-white transition duration-300">Súbory cookie</a>
+            </div>
+            <p>&copy; 2024 GAMEPLA631. Autor: Kristián Stareček. Všetky práva vyhradené.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Plynulé posúvanie stránky pre navigačné odkazy
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId && targetId.length > 1) { // Kontrola, či to nie je len '#'
+                    document.querySelector(targetId).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        const paymentModal = document.getElementById('paymentModal');
+        const openModalBtns = document.querySelectorAll('.open-modal-btn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const paymentForm = document.getElementById('paymentForm');
+        const creditCardForm = document.getElementById('creditCardForm');
+        const messageBox = document.getElementById('messageBox');
+        const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
+
+        // Funkcia na zobrazenie modálneho okna
+        openModalBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                paymentModal.classList.remove('hidden');
+            });
+        });
+
+        // Funkcia na zatvorenie modálneho okna
+        closeModalBtn.addEventListener('click', () => {
+            paymentModal.classList.add('hidden');
+            messageBox.classList.add('hidden');
+        });
+
+        // Prepínanie zobrazenia formulára platobnej karty
+        paymentMethods.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                if (event.target.value === 'card') {
+                    creditCardForm.classList.remove('hidden');
+                } else {
+                    creditCardForm.classList.add('hidden');
+                }
+            });
+        });
+
+        // Spracovanie odoslania formulára
+        paymentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Simulácia validácie formulára
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+            if (fullName === '' || email === '') {
+                messageBox.textContent = 'Prosím, vyplňte všetky povinné polia.';
+                messageBox.classList.remove('hidden');
+                messageBox.classList.add('bg-red-900', 'text-red-300');
+                return;
+            }
+
+            if (paymentMethod === 'card') {
+                const cardNumber = document.getElementById('cardNumber').value;
+                const expiry = document.getElementById('expiry').value;
+                const cvc = document.getElementById('cvc').value;
+
+                if (cardNumber === '' || expiry === '' || cvc === '') {
+                    messageBox.textContent = 'Prosím, vyplňte všetky údaje o karte.';
+                    messageBox.classList.remove('hidden');
+                    messageBox.classList.add('bg-red-900', 'text-red-300');
+                    return;
+                }
+            }
+
+            // Simulácia úspešnej platby
+            messageBox.textContent = 'Platba bola úspešná! Lístok vám bol zaslaný na e-mail.';
+            messageBox.classList.remove('hidden', 'bg-red-900', 'text-red-300');
+            messageBox.classList.add('bg-green-900', 'text-green-300');
+            paymentForm.reset();
+            
+            // Automatické skrytie po 3 sekundách
+            setTimeout(() => {
+                paymentModal.classList.add('hidden');
+                messageBox.classList.add('hidden');
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
